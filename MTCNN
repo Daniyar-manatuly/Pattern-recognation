@@ -1,0 +1,48 @@
+import cv2
+import numpy as np
+from mtcnn import MTCNN
+
+# Загружаем изображение
+image_path = "C:/Users/opste/Downloads/IMG_20240607_164552_287.jpg"
+image = cv2.imread(image_path)
+
+# Преобразуем BGR в RGB (MTCNN работает с RGB)
+image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+# Инициализируем MTCNN
+detector = MTCNN()
+
+# Обнаружение лиц
+faces = detector.detect_faces(image_rgb)
+
+if faces:
+    # Берем первое лицо
+    face = faces[0]
+    x, y, width, height = face['box']
+
+    # Рисуем рамку вокруг лица
+    cv2.rectangle(image, (x, y), (x + width, y + height), (0, 255, 0), 2)
+
+    # Получаем координаты глаз
+    keypoints = face['keypoints']
+    left_eye = keypoints['left_eye']
+    right_eye = keypoints['right_eye']
+
+    # Отмечаем глаза точками
+    cv2.circle(image, left_eye, 5, (0, 0, 255), -1)
+    cv2.circle(image, right_eye, 5, (0, 0, 255), -1)
+
+    # Изменяем размер окна
+    scale_percent = 50  # Уменьшаем на 50%
+    width = int(image.shape[1] * scale_percent / 100)
+    height = int(image.shape[0] * scale_percent / 100)
+    resized_image = cv2.resize(image, (width, height))
+
+    # Показываем изображение
+    cv2.imshow("Detected Face and Eyes", resized_image)
+
+    # Держим окно открытым
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+else:
+    print("Лицо не найдено.")
